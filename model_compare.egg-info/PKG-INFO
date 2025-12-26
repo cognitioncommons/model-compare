@@ -1,0 +1,215 @@
+Metadata-Version: 2.4
+Name: model-compare
+Version: 0.1.0
+Summary: Side-by-side comparison of LLM model outputs
+Author-email: Cognition Commons <tools@cognitioncommons.com>
+License: MIT
+Project-URL: Homepage, https://github.com/cognitioncommons/model-compare
+Project-URL: Documentation, https://github.com/cognitioncommons/model-compare#readme
+Project-URL: Repository, https://github.com/cognitioncommons/model-compare.git
+Project-URL: Issues, https://github.com/cognitioncommons/model-compare/issues
+Keywords: llm,ai,comparison,gpt,claude,gemini
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: httpx>=0.25.0
+Requires-Dist: rich>=13.0.0
+Requires-Dist: click>=8.0.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0.0; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.21.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.0.0; extra == "dev"
+Requires-Dist: black>=23.0.0; extra == "dev"
+Requires-Dist: ruff>=0.1.0; extra == "dev"
+Requires-Dist: mypy>=1.0.0; extra == "dev"
+
+# Model Compare
+
+Side-by-side comparison of LLM model outputs. Run the same prompt against multiple models and compare their responses, metrics, and costs.
+
+## Features
+
+- Run prompts against multiple LLM providers (OpenAI, Anthropic, Google)
+- Compare outputs with unified diffs and side-by-side views
+- Track metrics: latency, token usage, cost
+- Batch processing for multiple prompts
+- Generate reports in HTML, Markdown, JSON, or CSV formats
+- Rich terminal output with syntax highlighting
+
+## Installation
+
+```bash
+pip install model-compare
+```
+
+Or install from source:
+
+```bash
+git clone https://github.com/cognitioncommons/model-compare.git
+cd model-compare
+pip install -e .
+```
+
+## Configuration
+
+Set API keys as environment variables:
+
+```bash
+export OPENAI_API_KEY="sk-..."
+export ANTHROPIC_API_KEY="sk-ant-..."
+export GOOGLE_API_KEY="..."
+```
+
+## Usage
+
+### Run a Single Prompt
+
+Compare models on a single prompt:
+
+```bash
+# Basic comparison
+model-compare run prompt.txt --models gpt-4,claude-3-opus
+
+# Show unified diff between outputs
+model-compare run prompt.txt -m gpt-4,gpt-3.5-turbo --diff
+
+# Save results to JSON
+model-compare run prompt.txt -m gpt-4o,claude-3-5-sonnet -o results.json
+
+# Show only metrics (no full outputs)
+model-compare run prompt.txt -m gpt-4,claude-3-opus --metrics-only
+
+# Quiet mode (minimal output)
+model-compare run prompt.txt -m gpt-4,gpt-3.5-turbo -q
+```
+
+### Batch Processing
+
+Run multiple prompts from a directory:
+
+```bash
+# Process all .txt files in a directory
+model-compare batch prompts/ --models gpt-4,gpt-3.5-turbo
+
+# Save results to output directory
+model-compare batch prompts/ -m gpt-4,claude-3-opus -o results/
+
+# Use custom glob pattern
+model-compare batch prompts/ -m gpt-4o -p "*.md"
+
+# Show only summary
+model-compare batch prompts/ -m gpt-4,gpt-3.5-turbo --summary-only
+```
+
+### Generate Reports
+
+Create reports from saved results:
+
+```bash
+# HTML report (default)
+model-compare report results/ --format html
+
+# Markdown report
+model-compare report results/ -f markdown -o report.md
+
+# CSV for spreadsheets
+model-compare report results/ -f csv -o metrics.csv
+
+# JSON for further processing
+model-compare report results/ -f json -o data.json
+```
+
+## Supported Models
+
+### OpenAI
+- `gpt-4`, `gpt-4-turbo`, `gpt-4o`, `gpt-4o-mini`
+- `gpt-3.5-turbo`
+- `o1`, `o1-mini`
+
+### Anthropic
+- `claude-3-opus`, `claude-3-opus-20240229`
+- `claude-3-sonnet`, `claude-3-5-sonnet`, `claude-3-5-sonnet-20241022`
+- `claude-3-haiku`, `claude-3-5-haiku`
+
+### Google
+- `gemini-1.5-pro`
+- `gemini-1.5-flash`
+- `gemini-2.0-flash-exp`
+
+## Output Metrics
+
+For each model run, the following metrics are captured:
+
+| Metric | Description |
+|--------|-------------|
+| Latency | Response time in milliseconds |
+| Input Tokens | Number of tokens in the prompt |
+| Output Tokens | Number of tokens in the response |
+| Cost | Estimated cost in USD |
+| Words | Word count in the output |
+| Tokens/sec | Output generation speed |
+
+## Examples
+
+### Compare Code Generation
+
+```bash
+echo "Write a Python function to calculate fibonacci numbers" > prompt.txt
+model-compare run prompt.txt -m gpt-4,claude-3-opus,gemini-1.5-pro
+```
+
+### Compare Summarization
+
+```bash
+echo "Summarize this article in 3 bullet points: [article text]" > prompt.txt
+model-compare run prompt.txt -m gpt-3.5-turbo,gpt-4,claude-3-haiku --diff
+```
+
+### Batch Evaluation
+
+```bash
+# Create test prompts
+mkdir prompts
+echo "Explain recursion simply" > prompts/explain.txt
+echo "Write a haiku about programming" > prompts/creative.txt
+echo "What is 2 + 2?" > prompts/math.txt
+
+# Run batch comparison
+model-compare batch prompts/ -m gpt-4,claude-3-sonnet -o results/
+
+# Generate report
+model-compare report results/ -f html -o comparison.html
+```
+
+## API Usage
+
+You can also use model-compare as a library:
+
+```python
+from model_compare.runner import run_prompt, ModelRunner
+from model_compare.metrics import calculate_aggregate_metrics
+from model_compare.diff import compare_all_outputs
+
+# Run comparison
+results = run_prompt(["gpt-4", "claude-3-opus"], "What is AI?")
+
+# Get metrics
+metrics = calculate_aggregate_metrics(results)
+print(f"Fastest: {metrics.fastest_model}")
+print(f"Cheapest: {metrics.cheapest_model}")
+
+# Compare outputs
+comparison = compare_all_outputs(results)
+print(f"Similarity: {comparison.average_similarity:.1%}")
+```
+
+## License
+
+MIT

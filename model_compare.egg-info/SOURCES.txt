@@ -1,0 +1,14 @@
+README.md
+pyproject.toml
+model_compare/__init__.py
+model_compare/cli.py
+model_compare/diff.py
+model_compare/display.py
+model_compare/metrics.py
+model_compare/runner.py
+model_compare.egg-info/PKG-INFO
+model_compare.egg-info/SOURCES.txt
+model_compare.egg-info/dependency_links.txt
+model_compare.egg-info/entry_points.txt
+model_compare.egg-info/requires.txt
+model_compare.egg-info/top_level.txt

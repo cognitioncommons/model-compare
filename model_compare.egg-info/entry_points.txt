@@ -1,0 +1,2 @@
+[console_scripts]
+model-compare = model_compare.cli:main
